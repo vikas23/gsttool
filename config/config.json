@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "PORT": 3000,
+  "MONGOURL": "mongodb://localhost:27017/",
+  "MONGOURL_PROD": "mongodb://gsttool:g3tU3Er@localhost/gsttool"
+}
