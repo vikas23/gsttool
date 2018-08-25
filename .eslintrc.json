@@ -42,6 +42,7 @@
     },
     "globals": {
         "_": true,
-        "logger": true
+        "logger": true,
+        "config": true
     }
 }

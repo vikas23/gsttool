@@ -28,7 +28,7 @@ const logger = winston.createLogger({
       level: 'silly',
     }),
     new winston.transports.File({
-      filename: path.join(LOGDIRECTORYROOT, 'colormaster-notary.log'),
+      filename: path.join(LOGDIRECTORYROOT, 'gst-tool.log'),
       level: 'silly',
       json: true,
       colorize: true,

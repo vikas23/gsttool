@@ -2,5 +2,7 @@
   "version": 1,
   "PORT": 3000,
   "MONGOURL": "mongodb://localhost:27017/",
-  "MONGOURL_PROD": "mongodb://gsttool:g3tU3Er@localhost/gsttool"
+  "MONGOURL_PROD": "mongodb://gsttool:g3tU3Er@localhost/gsttool",
+  "defaultKey": "1234",
+  "tokenExpireTime": "1800000"
 }

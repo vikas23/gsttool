@@ -29,7 +29,7 @@ const DBService = {
 
   async findAll(model, query, options) {
     try {
-      return await db.getDB(dbName).collection(model).findAll(query, options);
+      return await db.getDB(dbName).collection(model).find(query, options).toArray();
     } catch (e) {
       logger.error(`Failed to fetch data ${e.stack}`);
       return e;
@@ -57,9 +57,27 @@ const DBService = {
     }
   },
 
+  async update(model, filter, doc, options) {
+    try {
+      return await db.getDB(dbName).collection(model).update(filter, doc, options);
+    } catch (e) {
+      logger.error(`Failed to update model ${e.stack}`);
+      return e;
+    }
+  },
+
   async deleteOne(model, filter, options) {
     try {
       return await db.getDB(dbName).collection(model).deleteOne(filter, options);
+    } catch (e) {
+      logger.error(`Failed to delete model ${e.stack}`);
+      return e;
+    }
+  },
+
+  async deleteMany(model, filter, options) {
+    try {
+      return await db.getDB(dbName).collection(model).deleteMany(filter, options);
     } catch (e) {
       logger.error(`Failed to delete model ${e.stack}`);
       return e;

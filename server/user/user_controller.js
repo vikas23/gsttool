@@ -11,6 +11,15 @@ const UserController = {
     }
     return response;
   },
+
+  async storeSessionDetails(reqBody, token) {
+
+    try {
+      await UserService.storeSession(reqBody, token);
+    } catch (err) {
+      logger.error(`Unable to store user session details ${err.stack}`);
+    }
+  },
 };
 
 module.exports = UserController;
