@@ -7,8 +7,10 @@ const _ = require('lodash'); // eslint-disable-line no-unused-vars
 const config = require('./config');
 const db = require('./config/db');
 const router = require('./server/routes');
+const routerLogin = require('./server/routes-login');
 const logger = require('./config/winston');
 // const swaggerDocument = require('./config/swagger.json');
+const authMw = require('./auth');
 
 const env = process.env.NODE_ENV;
 
@@ -23,12 +25,13 @@ app.use(bodyParser.urlencoded({
 
 app.use(bodyParser.json());
 
-app.use((req, res, next) => {
-
-});
 if (env === 'dev') {
   // app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 }
+
+app.use('/user', routerLogin);
+
+app.use(authMw);
 
 app.use('', router);
 

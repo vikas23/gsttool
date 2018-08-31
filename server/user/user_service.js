@@ -14,7 +14,7 @@ async function getAllExpiredSessionIds() {
       lastUsedTime: 1,
     });
     _.each(activeSessions, (session) => {
-      if (config.tokenExpireTime < session.lastUsedTime - currentTime) expiredSessionIds.push(session._id);
+      if (currentTime - session.lastUsedTime > config.tokenExpireTime) expiredSessionIds.push(session._id);
     });
   } catch (e) {
     logger.error('Unable to fetch the sessions');
@@ -31,6 +31,18 @@ const UserService = {
       logger.error(`Failed to create new user ${err.stack}`);
     }
     return userId;
+  },
+
+  async getUserDetails(data) {
+    try {
+      const filter = {
+        phone: data.phone,
+      };
+      return await dbService.findOne(userModel, filter);
+    } catch (err) {
+      logger.error(`Failed to find the user ${err.stack}`);
+      return null;
+    }
   },
 
   async storeSession(data) {
@@ -78,6 +90,22 @@ const UserService = {
       await dbService.updateOne(userSessionModel, filter, query);
     } catch (err) {
       logger.error(`Unable to update the session ${err.stack}`);
+    }
+  },
+
+  async changeUserPasword(data) {
+    try {
+      const filter = {
+        _id: data.id,
+      };
+      const query = {
+        $set: {
+          password: data.password,
+        },
+      };
+      await dbService.updateOne(userModel, filter, query);
+    } catch (err) {
+      logger.error(`Unable to update the password of user ${err.stack}`);
     }
   },
 };

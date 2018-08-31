@@ -12,12 +12,34 @@ const UserController = {
     return response;
   },
 
-  async storeSessionDetails(reqBody, token) {
-
+  async storeSessionDetails(reqBody) {
     try {
-      await UserService.storeSession(reqBody, token);
+      const data = {
+        phone: reqBody.phone,
+        token: reqBody.token,
+        isActive: true,
+        lastUsedTime: new Date().getTime(),
+      };
+      await UserService.storeSession(data);
     } catch (err) {
       logger.error(`Unable to store user session details ${err.stack}`);
+    }
+  },
+
+  async getUserDetails(reqBody) {
+    try {
+      return await UserService.getUserDetails(reqBody);
+    } catch (err) {
+      logger.error(`Unable to get the user details ${err.stack}`);
+      return null;
+    }
+  },
+
+  async changePasword(reqBody) {
+    try {
+      await UserService.changeUserPasword(reqBody);
+    } catch (err) {
+      logger.error(`Unable to change the user password ${err.stack}`);
     }
   },
 };

@@ -12,7 +12,7 @@ async function isUserAuthenticated(headers) {
   if (token && userId) {
     try {
       // verifies secret and checks exp
-      jwt.verify(token, config.defaultKey, (err, decoded) => {
+      jwt.verify(token, config.defaultKey, (err) => {
         if (!err) {
           isAuth = true;
         }
@@ -25,6 +25,9 @@ async function isUserAuthenticated(headers) {
         };
         const userSession = await dbService.findOne(userSessionModel, query);
         if (userSession) isAuth = true;
+      }
+      if (isAuth) {
+        // Update Last used time
       }
     } catch (err) {
       logger.error(`Invalid headers with error ${err.stack}`);
