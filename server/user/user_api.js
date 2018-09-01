@@ -5,9 +5,9 @@ const jwt = require('jsonwebtoken');
 const router = Router();
 const UserController = require('./user_controller');
 
-router.post('/registeruser', async (req, resp) => {
+router.post('/registerEmployer', async (req, resp) => {
   try {
-    const user = await UserController.getUserDetails(req.body.phone);
+    const user = await UserController.getUserDetails(req.body);
     if (user) {
       return resp.status(404).send({
         userAlreadyExist: true,
@@ -15,15 +15,9 @@ router.post('/registeruser', async (req, resp) => {
     }
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
     req.body.password = hashedPassword;
-    const response = await UserController.checkAndInsertUser(req.body);
-    const token = jwt.sign({
-      id: response.id,
-    }, config.defaultKey, {
-      expiresIn: config.tokenExpireTime,
-    });
+    const response = await UserController.checkAndInsertEmployer(req.body);
     return resp.status(200).send({
-      auth: true,
-      token,
+      success: true,
       userId: response.id,
     });
   } catch (err) {
@@ -36,7 +30,7 @@ router.post('/registeruser', async (req, resp) => {
 
 router.post('/login', async (req, resp) => {
   try {
-    const user = await UserController.getUserDetails(req.body.phone);
+    const user = await UserController.getUserDetails(req.body);
     if (!user) return resp.status(404).send('No user found.');
     // check if the password is valid
     const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
@@ -44,12 +38,6 @@ router.post('/login', async (req, resp) => {
       return resp.status(401).send({
         auth: false,
         token: null,
-      });
-    }
-    if (user.isChangePass) {
-      return resp.status(200).send({
-        auth: true,
-        changePasword: true,
       });
     }
     // if user is found and password is valid
@@ -62,10 +50,18 @@ router.post('/login', async (req, resp) => {
     req.body.token = token;
     await UserController.storeSessionDetails(req.body, token);
 
+    if (user.isChangePass) {
+      return resp.status(200).send({
+        auth: true,
+        changePasword: true,
+      });
+    }
+
     return resp.status(200).send({
       auth: true,
       token,
       userId: user._id,
+      userType: user.userType,
     });
   } catch (err) {
     logger.error(`Unable to logged in the user ${err.stack}`);
@@ -85,19 +81,11 @@ router.get('/logout', (req, res) => {
 
 router.post('/changePassword', async (req, resp) => {
   try {
-    const user = await UserController.getUserDetails(req.body.phone);
+    const user = await UserController.getUserDetails(req.body);
     if (!user) return resp.status(404).send('No user found.');
-    // check if the password is valid
-    const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
-    if (!passwordIsValid) {
-      return resp.status(401).send({
-        auth: false,
-        token: null,
-      });
-    }
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
     req.body.password = hashedPassword;
-    await UserController.changePasword(resp.body);
+    await UserController.changePasword(req.body);
     return resp.status(200).send({
       success: true,
     });

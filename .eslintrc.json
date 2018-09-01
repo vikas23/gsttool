@@ -43,6 +43,7 @@
     "globals": {
         "_": true,
         "logger": true,
-        "config": true
+        "config": true,
+        "USERTYPE": true
     }
 }

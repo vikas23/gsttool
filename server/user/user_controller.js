@@ -1,10 +1,18 @@
 const UserService = require('./user_service');
 
 const UserController = {
-  async checkAndInsertUser(data) {
+  async checkAndInsertEmployer(data) {
     const response = {};
+    const employerData = data;
+    employerData.userType = USERTYPE.EMPLOYER;
     try {
-      response.id = await UserService.addUser(data);
+      response.id = await UserService.addUser(employerData);
+      const employerDataDb = {
+        name: employerData.name,
+        phone: employerData.phone,
+        userId: response.id,
+      };
+      await UserService.addEmployerData(employerDataDb);
     } catch (err) {
       response.error = 'Unable to add user';
       logger.error(`Unable to add user ${err.stack}`);
@@ -31,6 +39,15 @@ const UserController = {
       return await UserService.getUserDetails(reqBody);
     } catch (err) {
       logger.error(`Unable to get the user details ${err.stack}`);
+      return null;
+    }
+  },
+
+  async getUserDetailsId(userId) {
+    try {
+      return await UserService.getUserDetailsId(userId);
+    } catch (err) {
+      logger.error(`Unable to get the user details using id ${err.stack}`);
       return null;
     }
   },

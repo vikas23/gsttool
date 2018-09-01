@@ -4,11 +4,13 @@ const app = express();
 const bodyParser = require('body-parser');
 // const swaggerUi = require('swagger-ui-express');
 const _ = require('lodash'); // eslint-disable-line no-unused-vars
+const schedule = require('node-schedule');
 const config = require('./config');
 const db = require('./config/db');
 const router = require('./server/routes');
 const routerLogin = require('./server/routes-login');
 const logger = require('./config/winston');
+const UserService = require('./server/user/user_service');
 // const swaggerDocument = require('./config/swagger.json');
 const authMw = require('./auth');
 
@@ -18,6 +20,11 @@ const env = process.env.NODE_ENV;
 global._ = _;
 global.logger = logger;
 global.config = config;
+global.USERTYPE = {
+  EMPLOYER: 1,
+  EMPLOYEE: 2,
+  CUSTOMER: 3,
+};
 
 app.use(bodyParser.urlencoded({
   extended: true,
@@ -67,3 +74,16 @@ db.connect(config.MONGOURL, (err) => {
     });
   }
 });
+
+// Check and removed expired sessions
+
+try {
+  const j = schedule.scheduleJob('*/30 * * * *', () => {
+    UserService.checkAndRemoveExpiredSession();
+  });
+  if (!j) {
+    throw new Error('Unable to schedule the Job');
+  }
+} catch (err) {
+  logger.error(`Unable to schedule the job ${err.stack}`);
+}

@@ -2,6 +2,7 @@ const dbService = require('../../db_services');
 
 const userModel = 'user';
 const userSessionModel = 'userSession';
+const employerModel = 'employer';
 
 async function getAllExpiredSessionIds() {
   const expiredSessionIds = [];
@@ -39,6 +40,15 @@ const UserService = {
         phone: data.phone,
       };
       return await dbService.findOne(userModel, filter);
+    } catch (err) {
+      logger.error(`Failed to find the user ${err.stack}`);
+      return null;
+    }
+  },
+
+  async getUserDetailsId(userId) {
+    try {
+      return await dbService.findOneById(userModel, userId);
     } catch (err) {
       logger.error(`Failed to find the user ${err.stack}`);
       return null;
@@ -96,16 +106,25 @@ const UserService = {
   async changeUserPasword(data) {
     try {
       const filter = {
-        _id: data.id,
+        phone: data.phone,
       };
       const query = {
         $set: {
           password: data.password,
+          isChangePass: false,
         },
       };
       await dbService.updateOne(userModel, filter, query);
     } catch (err) {
       logger.error(`Unable to update the password of user ${err.stack}`);
+    }
+  },
+
+  async addEmployerData(data) {
+    try {
+      await dbService.insertOne(employerModel, data);
+    } catch (err) {
+      logger.error(`Unable to insert the employer data ${err.stack}`);
     }
   },
 };
