@@ -6,7 +6,7 @@ const router = Router();
 const EmployeeController = require('./employee_controller');
 const UserController = require('../user/user_controller');
 
-router.post('/  ', async (req, resp) => {
+router.post('/createCustomer', async (req, resp) => {
   try {
     const user = await UserController.getUserDetails(req.body);
     if (user) {
@@ -29,6 +29,7 @@ router.post('/  ', async (req, resp) => {
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
     req.body.password = hashedPassword;
     const response = await EmployeeController.addCustomer(req.body, employeeData);
+    // Reduce token by one for the employer
     return resp.status(200).send({
       success: true,
       userId: response.id,
