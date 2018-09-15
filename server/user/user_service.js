@@ -1,4 +1,9 @@
+const AWS = require('aws-sdk');
 const dbService = require('../../db_services');
+const EmployerService = require('../employer/employer_service');
+
+const s3 = new AWS.S3();
+
 
 const userModel = 'user';
 const userSessionModel = 'userSession';
@@ -122,10 +127,46 @@ const UserService = {
 
   async addEmployerData(data) {
     try {
-      await dbService.insertOne(employerModel, data);
+      return await dbService.insertOne(employerModel, data);
     } catch (err) {
       logger.error(`Unable to insert the employer data ${err.stack}`);
+      return null;
     }
+  },
+
+  async createS3Bucket(employerData) {
+    const myBucket = `${employerData.name.toLowerCase()}-${employerData.phone}`;
+    const myKey = `saralgst@${employerData.phone}`;
+    s3.createBucket({
+      Bucket: myBucket,
+    }, async (err) => {
+      if (err) {
+        logger.error(err);
+      } else {
+        try {
+          // Update S3 details on employer DB
+          await EmployerService.updateS3Details(employerData._id, {
+            bucket: myBucket,
+            bucketKey: myKey,
+          });
+        } catch (error) {
+          logger.error('Unable to update the employer details with S3 details');
+        }
+        const params = {
+          Bucket: myBucket,
+          Key: myKey,
+          Body: 'SaralGst!',
+        };
+
+        s3.putObject(params, (e) => {
+          if (e) {
+            logger.error(e);
+          } else {
+            logger.info('Successfully uploaded data to myBucket/myKey');
+          }
+        });
+      }
+    });
   },
 };
 

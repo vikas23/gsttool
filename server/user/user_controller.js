@@ -12,7 +12,9 @@ const UserController = {
         phone: employerData.phone,
         userId: response.id,
       };
-      await UserService.addEmployerData(employerDataDb);
+      const employerId = await UserService.addEmployerData(employerDataDb);
+      employerData._id = employerId;
+      await UserService.createS3Bucket(employerDataDb);
     } catch (err) {
       response.error = 'Unable to add user';
       logger.error(`Unable to add user ${err.stack}`);

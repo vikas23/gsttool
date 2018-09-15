@@ -69,4 +69,30 @@ router.post('/createEmployee', async (req, resp) => {
   }
 });
 
+router.get('/getAllEmployees', async (req, resp) => {
+  try {
+    const employerUserId = req.headers['x-user-id'];
+    const employerUserData = await UserController.getUserDetailsId(employerUserId);
+    if (!employerUserData) {
+      return resp.status(404).send({
+        employerNotExist: true,
+      });
+    }
+    const employerUser = {
+      _id: employerUserId,
+    };
+    const employerData = await EmployerController.getEmployerDetails(employerUser);
+
+    const allEmployees = await EmployerController.getAllEmployees(employerData._id);
+    return resp.status(200).send({
+      success: true,
+      allEmployees,
+    });
+  } catch (err) {
+    logger.error(`Unable to fetch all employee ${err.stack}`);
+    return resp.status(403).send({
+      error: err,
+    });
+  }
+});
 module.exports = router;

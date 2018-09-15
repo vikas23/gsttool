@@ -1,0 +1,72 @@
+log_format response_time    '$remote_addr - $remote_user [$time_local] rt=$request_time '
+                            '"$request" $status $body_bytes_sent '
+                            '"$http_referer" "$http_user_agent"';
+access_log /var/log/nginx/colormaster.access.log response_time;
+error_log /var/log/nginx/colormaster.error.log info;
+
+server_tokens off;
+
+limit_req_zone $request_uri zone=insertToken:10m rate=10r/s;
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+server {
+    listen 80;
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+server {
+    listen 443 ssl;
+
+    # disable ssl protocol specification until we can rely on download utility support for specified protocols
+    #ssl_protocols TLSv1.1 TLSv1.2;
+
+    ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH !RC4";
+    ssl_prefer_server_ciphers on;
+
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout  5m;
+
+    ssl_certificate      /etc/nginx/.ct-ssl/cert.pem;
+    ssl_certificate_key  /etc/nginx/.ct-ssl/key.pem;
+
+    # gzip
+    #gzip on;
+    #gzip_comp_level 5;
+    #gzip_min_length 1024;
+    #gzip_types application/x-javascript application/javascript application/json text/css text/html text/plain;
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_pass http://127.0.0.1:3000;
+
+        add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+        expires off;
+        add_header 'X-Xss-Protection' '1; mode=block' always;
+        add_header 'Content-Security-Policy' "default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://$host:*/ wss://$host:*/ http://$host:*/ ws://$host:*/";
+        add_header 'X-Frame-Options' 'SAMEORIGIN' always;
+        add_header 'Strict-Transport-Security' 'max-age=31536000';
+        add_header 'X-Content-Type-Options' 'nosniff' always;
+        add_header 'Referrer-Policy' 'origin';
+        add_header 'Access-Control-Allow-Credentials' 'true';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
+        add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,X-CustomHeader,X-Auth-Token,X-User-Id,Tenant-Id,X-File-Name,X-File-Size';
+
+        if ($request_method = 'OPTIONS') {
+            # Code blocks ignore previous headers, so have to repeat for preflight
+            add_header 'Access-Control-Allow-Origin' "*";
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, PUT, DELETE';
+            add_header 'Access-Control-Allow-Headers' 'Accept,Authorization,Cache-Control,Content-Type,DNT,If-Modified-Since,Keep-Alive,Origin,User-Agent,X-Requested-With,X-CustomHeader,X-Auth-Token,X-User-Id,Tenant-Id,X-File-Name,X-File-Size';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+    }
+}
+

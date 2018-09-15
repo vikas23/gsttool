@@ -1,5 +1,6 @@
 const UserService = require('../user/user_service');
 const EmployeeService = require('../employee/employee_service');
+const EmployerService = require('../employer/employer_service');
 
 const EmployeeController = {
   async addCustomer(data, employeeData) {
@@ -16,6 +17,7 @@ const EmployeeController = {
         employeeId: employeeData._id,
       };
       await EmployeeService.addCustomerData(customerDataDb);
+      await EmployerService.decrementToken(employeeData.employerId);
     } catch (err) {
       logger.error(`Unable to create the customer ${err.stack}`);
     }
@@ -27,6 +29,15 @@ const EmployeeController = {
       return await EmployeeService.getEmployeeData(user._id);
     } catch (err) {
       logger.error(`Unable to fetch the employee details ${err.stack}`);
+      return null;
+    }
+  },
+
+  async getAllCustomer(employeeId) {
+    try {
+      return await EmployeeService.getAllCustomer(employeeId);
+    } catch (err) {
+      logger.error(`Unable to fetch all the customer details ${err.stack}`);
       return null;
     }
   },

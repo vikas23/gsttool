@@ -7,6 +7,7 @@ const UserController = require('./user_controller');
 
 router.post('/registerEmployer', async (req, resp) => {
   try {
+    logger.info('User register employer is called');
     const user = await UserController.getUserDetails(req.body);
     if (user) {
       return resp.status(404).send({

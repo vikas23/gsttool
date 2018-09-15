@@ -64,7 +64,7 @@ const EmployerController = {
 
   async createEmployee(data, employerData) {
     const employeeData = data;
-    employeeData.isChangePass = true;
+    employeeData.isChangePass = false;
     employeeData.userType = USERTYPE.EMPLOYEE;
     const response = {};
     try {
@@ -89,6 +89,15 @@ const EmployerController = {
     } catch (err) {
       logger.error(`Unable to fetch the employer details ${err.stack}`);
       return {};
+    }
+  },
+
+  async getAllEmployees(employerId) {
+    try {
+      return await EmployerService.getAllEmployees(employerId);
+    } catch (err) {
+      logger.error(`Unable to fetch all the employee ${err.stack}`);
+      return null;
     }
   },
 };

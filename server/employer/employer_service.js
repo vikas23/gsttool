@@ -19,6 +19,16 @@ const EmployerService = {
     return employerData;
   },
 
+  async getEmployerDataId(employerId) {
+    let employeeData;
+    try {
+      employeeData = await dbService.findOneById(employerModel, employerId);
+    } catch (err) {
+      logger.error(`Unable to fetch the employer data ${err.stack}`);
+    }
+    return employeeData;
+  },
+
   async setTokens(empId) {
     const strLen = empId.length;
     const _id = `${empId.substring(1, strLen - 1)}`;
@@ -68,6 +78,50 @@ const EmployerService = {
       await dbService.updateOne(employerModel, filter, query);
     } catch (err) {
       logger.error('Unable to update the license');
+    }
+  },
+
+  async updateS3Details(_id, s3Data) {
+    try {
+      const filter = {
+        _id,
+      };
+      const query = {
+        $set: {
+          s3Details: s3Data,
+        },
+      };
+      await dbService.updateOne(employerModel, filter, query);
+    } catch (err) {
+      logger.error('Unable to update the S3 details');
+    }
+  },
+
+  async decrementToken(employerId) {
+    try {
+      const filter = {
+        _id: employerId,
+      };
+      const query = {
+        $inc: {
+          tokenNumber: -1,
+        },
+      };
+      await dbService.updateOne(employerModel, filter, query);
+    } catch (err) {
+      logger.error(`Unable to decrement the token ${err.stack}`);
+    }
+  },
+
+  async getAllEmployees(employerId) {
+    try {
+      const filter = {
+        employerId,
+      };
+      return await dbService.findAll(employeeModel, filter);
+    } catch (err) {
+      logger.error(`Unable to fetch all the employees ${err.stack}`);
+      return null;
     }
   },
 };
