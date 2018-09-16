@@ -33,8 +33,34 @@ const EmployeeService = {
       };
       return await dbService.findAll(customerModel, query);
     } catch (err) {
+      logger.error(`Unable to fetch all the customer details ${err.stack}`);
+      return null;
+    }
+  },
+
+  async getCustomerDetails(phone) {
+    try {
+      const query = {
+        phone,
+      };
+      return await dbService.findOne(customerModel, query);
+    } catch (err) {
       logger.error(`Unable to fetch the customer details ${err.stack}`);
       return null;
+    }
+  },
+
+  async updateCustomerDetails(customerData) {
+    try {
+      const filter = {
+        phone: customerData.phone,
+      };
+      const query = {
+        $set: customerData,
+      };
+      await dbService.update(customerModel, filter, query);
+    } catch (err) {
+      logger.error(`Unable to update the customer data ${err.stack}`);
     }
   },
 };

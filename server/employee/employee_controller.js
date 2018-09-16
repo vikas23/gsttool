@@ -41,6 +41,24 @@ const EmployeeController = {
       return null;
     }
   },
+
+  async getCustomerDetails(customerPhone) {
+    try {
+      return await EmployeeService.getCustomerDetails(customerPhone);
+    } catch (err) {
+      logger.error(`Unable to fetch the customer details ${err.stack}`);
+      return null;
+    }
+  },
+
+  async updateCustomerDetails(customerData) {
+    try {
+      return await EmployeeService.updateCustomerDetails(customerData);
+    } catch (err) {
+      logger.error(`Unable to update all the customer details ${err.stack}`);
+      return null;
+    }
+  },
 };
 
 module.exports = EmployeeController;

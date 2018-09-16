@@ -94,8 +94,14 @@ router.post('/uploadFile', async (req, resp) => {
       const {
         customerName,
         customerPhone,
+        filePrefix,
       } = fields;
-      if (error) throw new Error(error);
+      if (error) {
+        logger.error(`Unable to parse the form ${error.stack}`);
+        return resp.status(404).send({
+          formParseFailed: true,
+        });
+      }
       try {
         const {
           path,
@@ -104,9 +110,12 @@ router.post('/uploadFile', async (req, resp) => {
         const buffer = fs.readFileSync(path);
         const type = fileType(buffer);
         const timestamp = Date.now().toString();
-        const fileName = `${customerName[0]}-${customerPhone[0]}/${timestamp}-${originalFilename}`;
+        const fileName = `${customerName[0]}-${customerPhone[0]}/${filePrefix}-${timestamp}-${originalFilename}`;
         const data = await uploadFile(buffer, fileName, type, employerData.s3Details);
-        return resp.status(200).send(data);
+        data.filePrefix = filePrefix;
+        return resp.status(200).send({
+          uploadData: data,
+        });
       } catch (err) {
         return resp.status(403).send(err);
       }
@@ -139,6 +148,36 @@ router.get('/getAllCustomer', async (req, resp) => {
     });
   } catch (err) {
     logger.error(`Unable to fetch all customer ${err.stack}`);
+    return resp.status(403).send({
+      error: err,
+    });
+  }
+});
+
+router.put('/updateCustomer', async (req, resp) => {
+  try {
+    const employeeUserId = req.headers['x-user-id'];
+    const employeeUserData = await UserController.getUserDetailsId(employeeUserId);
+    if (!employeeUserData) {
+      return resp.status(404).send({
+        employeeNotExist: true,
+      });
+    }
+    const {
+      phone,
+    } = req.body;
+    const customer = await EmployeeController.getCustomerDetails(phone);
+    if (!customer) {
+      return resp.status(404).send({
+        customerNotExist: true,
+      });
+    }
+    await EmployeeController.updateCustomerDetails(req.body);
+    return resp.status(200).send({
+      success: true,
+    });
+  } catch (err) {
+    logger.error(`Unable to update all customer ${err.stack}`);
     return resp.status(403).send({
       error: err,
     });
