@@ -45,11 +45,11 @@ app.use((req, res, next) => {
 });
 
 
-app.use('', routerLogin);
+app.use('/api/v1', routerLogin);
 
 app.use(authMw);
 
-app.use('', router);
+app.use('/api/v1', router);
 
 app.use((req, res, next) => {
   const err = new Error('Not Found');
