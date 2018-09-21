@@ -8,7 +8,8 @@ const UserController = require('../user/user_controller');
 
 router.post('/set/license', async (req, resp) => {
   try {
-    const tokens = await EmployerController.setLicense(req.body);
+    const employerUserId = req.headers['x-user-id'];
+    const tokens = await EmployerController.setLicense(req.body, employerUserId);
     resp.status(200).send({
       success: true,
       tokens,

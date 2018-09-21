@@ -43,10 +43,11 @@ const EmployerController = {
     return license;
   },
 
-  async setLicense(data) {
+  async setLicense(data, employerId) {
     const {
       license,
     } = data;
+    data.id = employerId;
     let tokens;
     try {
       const employerInfo = EmployerService.getEmployerData(data.id);

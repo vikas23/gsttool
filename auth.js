@@ -42,13 +42,13 @@ async function authMw(req, res, next) {
   let isAuth = false;
   try {
     if (!token) {
-      return res.status(403).send({
+      return res.status(401).send({
         auth: false,
         message: 'No token provided.',
       });
     }
     if (!userId) {
-      return res.status(403).send({
+      return res.status(401).send({
         auth: false,
         message: 'No user id provided.',
       });
