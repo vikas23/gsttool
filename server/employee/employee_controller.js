@@ -33,6 +33,24 @@ const EmployeeController = {
     }
   },
 
+  async getCustomerData(user) {
+    try {
+      return await EmployeeService.getCustomerData(user._id);
+    } catch (err) {
+      logger.error(`Unable to fetch the employee details ${err.stack}`);
+      return null;
+    }
+  },
+
+  async getEmployeeDataById(empUserId) {
+    try {
+      return await EmployeeService.getEmployeeDataById(empUserId);
+    } catch (err) {
+      logger.error(`Unable to fetch the employee user details ${err.stack}`);
+      return null;
+    }
+  },
+
   async getAllCustomer(employeeId) {
     try {
       return await EmployeeService.getAllCustomer(employeeId);
@@ -51,12 +69,47 @@ const EmployeeController = {
     }
   },
 
+  async getCustomerDetailsId(userId) {
+    try {
+      console.log('Here');
+      return await EmployeeService.getCustomerDetailsByUserId(userId);
+    } catch (err) {
+      logger.error(`Unable to fetch the customer details ${err.stack}`);
+      return null;
+    }
+  },
+
   async updateCustomerDetails(customerData) {
     try {
       return await EmployeeService.updateCustomerDetails(customerData);
     } catch (err) {
       logger.error(`Unable to update all the customer details ${err.stack}`);
       return null;
+    }
+  },
+
+  async getCustomerBillInfo(customerData) {
+    try {
+      return await EmployeeService.getCustomerBillInfo(customerData);
+    } catch (err) {
+      logger.error(`Unable to fetch the customer bills ${err.stack}`);
+      return null;
+    }
+  },
+
+  async updateCustomerBillData(customerData) {
+    try {
+      await EmployeeService.updateCustomerBillData(customerData);
+    } catch (err) {
+      logger.error(`Unable to update the employee service ${err.stack}`);
+    }
+  },
+
+  async insertCustomerBillData(customerData) {
+    try {
+      await EmployeeService.insertCustomerBillData(customerData);
+    } catch (err) {
+      logger.error(`Unable to insert the new customer bill data ${err.stack}`);
     }
   },
 };

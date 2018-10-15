@@ -66,17 +66,27 @@ router.post('/createCustomer', async (req, resp) => {
 
 router.post('/uploadFile', async (req, resp) => {
   try {
-    const user = await UserController.getUserDetails(req.body);
-    if (user) {
-      return resp.status(404).send({
-        userAlreadyExist: true,
-      });
+    const userId = req.headers['x-user-id'];
+    const user = await UserController.getUserDetailsId(userId);
+    let employeeData;
+    if (user.userType === USERTYPE.CUSTOMER) {
+      const customerUser = {
+        _id: userId,
+      };
+      const customerData = await EmployeeController.getCustomerData(customerUser);
+      if (!customerData) {
+        return resp.status(404).send({
+          customerNotExist: true,
+        });
+      }
+      employeeData = await EmployeeController.getEmployeeDataById(customerData.employeeId);
+    } else {
+      const employeeUser = {
+        _id: userId,
+      };
+      employeeData = await EmployeeController.getEmployeeDetails(employeeUser);
     }
-    const employeeUserId = req.headers['x-user-id'];
-    const employeeUser = {
-      _id: employeeUserId,
-    };
-    const employeeData = await EmployeeController.getEmployeeDetails(employeeUser);
+
     if (!employeeData) {
       return resp.status(404).send({
         employeeNotExist: true,
@@ -92,8 +102,8 @@ router.post('/uploadFile', async (req, resp) => {
     const form = new multiparty.Form();
     form.parse(req, async (error, fields, files) => {
       const {
-        customerName,
-        customerPhone,
+        name,
+        phone,
         filePrefix,
       } = fields;
       if (error) {
@@ -110,7 +120,7 @@ router.post('/uploadFile', async (req, resp) => {
         const buffer = fs.readFileSync(path);
         const type = fileType(buffer);
         const timestamp = Date.now().toString();
-        const fileName = `${customerName[0]}-${customerPhone[0]}/${filePrefix}-${timestamp}-${originalFilename}`;
+        const fileName = `${name[0]}-${phone[0]}/${filePrefix}-${timestamp}-${originalFilename}`;
         const data = await uploadFile(buffer, fileName, type, employerData.s3Details);
         data.filePrefix = filePrefix;
         return resp.status(200).send({
@@ -121,7 +131,7 @@ router.post('/uploadFile', async (req, resp) => {
       }
     });
   } catch (err) {
-    logger.error('Unable to upload the file to S3');
+    logger.error(`Unable to upload the file to S3 ${err.stack}`);
     return resp.status(403).send({
       error: err,
     });
@@ -178,6 +188,60 @@ router.put('/updateCustomer', async (req, resp) => {
     });
   } catch (err) {
     logger.error(`Unable to update all customer ${err.stack}`);
+    return resp.status(403).send({
+      error: err,
+    });
+  }
+});
+
+router.get('/getCustomerBillData/:phone', async (req, resp) => {
+  try {
+    const employeeUserId = req.headers['x-user-id'];
+    const employeeUserData = await UserController.getUserDetailsId(employeeUserId);
+    if (!employeeUserData) {
+      return resp.status(404).send({
+        employeeNotExist: true,
+      });
+    }
+    const {
+      phone,
+    } = req.params;
+    const customer = await EmployeeController.getCustomerDetails(phone);
+    if (!customer) {
+      return resp.status(404).send({
+        customerNotExist: true,
+      });
+    }
+    const billData = await EmployeeController.getCustomerBillInfo(req.params);
+    return resp.status(200).send({
+      success: true,
+      billData,
+    });
+  } catch (err) {
+    logger.error(`Unable to fetch customer bill info ${err.stack}`);
+    return resp.status(403).send({
+      error: err,
+    });
+  }
+});
+
+router.post('/updateCustomerBillData', async (req, resp) => {
+  try {
+    const userId = req.headers['x-user-id'];
+    const customer = await EmployeeController.getCustomerDetailsId(userId);
+    if (!customer) {
+      return resp.status(404).send({
+        customerNotExist: true,
+      });
+    }
+    req.body.userId = userId;
+    req.body.phone = customer.phone;
+    await EmployeeController.insertCustomerBillData(req.body);
+    return resp.status(200).send({
+      success: true,
+    });
+  } catch (err) {
+    logger.error(`Unable to update the customer bills data ${err.stack}`);
     return resp.status(403).send({
       error: err,
     });

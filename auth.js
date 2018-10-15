@@ -62,14 +62,14 @@ async function authMw(req, res, next) {
       UserService.updateSessionTime(data);
       next();
     } else {
-      return res.status(500).send({
+      return res.status(401).send({
         auth: false,
         message: 'Failed to authenticate token.',
       });
     }
   } catch (err) {
     logger.error(`Unable to get the session info ${err.stack}`);
-    return res.status(503).send({
+    return res.status(403).send({
       auth: false,
       message: 'Failed to check token.',
     });

@@ -63,6 +63,8 @@ router.post('/login', async (req, resp) => {
       token,
       userId: user._id,
       userType: user.userType,
+      name: user.name,
+      phone: user.phone,
     });
   } catch (err) {
     logger.error(`Unable to logged in the user ${err.stack}`);
