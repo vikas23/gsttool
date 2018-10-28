@@ -112,21 +112,28 @@ router.post('/uploadFile', async (req, resp) => {
           formParseFailed: true,
         });
       }
+      const uploadData = [];
       try {
-        const {
-          path,
-          originalFilename,
-        } = files.file[0];
-        const buffer = fs.readFileSync(path);
-        const type = fileType(buffer);
-        const timestamp = Date.now().toString();
-        const fileName = `${name[0]}-${phone[0]}/${filePrefix}-${timestamp}-${originalFilename}`;
-        const data = await uploadFile(buffer, fileName, type, employerData.s3Details);
-        data.filePrefix = filePrefix;
-        return resp.status(200).send({
-          uploadData: data,
+        _.each(files.file, async (file) => {
+          const {
+            path,
+            originalFilename,
+          } = file;
+          const buffer = fs.readFileSync(path);
+          const type = fileType(buffer);
+          const timestamp = Date.now().toString();
+          const fileName = `${name[0]}-${phone[0]}/${filePrefix}-${timestamp}-${originalFilename}`;
+          const data = await uploadFile(buffer, fileName, type, employerData.s3Details);
+          data.filePrefix = filePrefix;
+          uploadData.push(data);
+          if (uploadData.length === files.file.length) {
+            return resp.status(200).send({
+              uploadData,
+            });
+          }
         });
       } catch (err) {
+        logger.error(`Unable to parse file upload form ${err.stack}`);
         return resp.status(403).send(err);
       }
     });
@@ -196,6 +203,32 @@ router.put('/updateCustomer', async (req, resp) => {
 
 router.get('/getCustomerBillData/:phone', async (req, resp) => {
   try {
+    const userId = req.headers['x-user-id'];
+    const user = await UserController.getUserDetailsId(userId);
+    let employeeData;
+    if (user.userType === USERTYPE.CUSTOMER) {
+      const customerUser = {
+        _id: userId,
+      };
+      const customerData = await EmployeeController.getCustomerData(customerUser);
+      if (!customerData) {
+        return resp.status(404).send({
+          customerNotExist: true,
+        });
+      }
+      employeeData = await EmployeeController.getEmployeeDataById(customerData.employeeId);
+    } else {
+      const employeeUser = {
+        _id: userId,
+      };
+      employeeData = await EmployeeController.getEmployeeDetails(employeeUser);
+    }
+
+    if (!employeeData) {
+      return resp.status(404).send({
+        employeeNotExist: true,
+      });
+    }
     const employeeUserId = req.headers['x-user-id'];
     const employeeUserData = await UserController.getUserDetailsId(employeeUserId);
     if (!employeeUserData) {

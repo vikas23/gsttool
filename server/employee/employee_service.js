@@ -51,10 +51,10 @@ const EmployeeService = {
 
   async getCustomerDetails(phone) {
     try {
-      const query = {
+      const filter = {
         phone,
       };
-      return await dbService.findOne(customerModel, query);
+      return await dbService.findOne(customerModel, filter);
     } catch (err) {
       logger.error(`Unable to fetch the customer details ${err.stack}`);
       return null;
@@ -126,7 +126,6 @@ const EmployeeService = {
       const filter = {
         userId,
       };
-      console.log(filter);
       customerData = await dbService.findOne(customerModel, filter);
     } catch (err) {
       logger.error(`Unable to fetch the customer details ${err.stack}`);

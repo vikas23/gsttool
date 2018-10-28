@@ -71,7 +71,6 @@ const EmployeeController = {
 
   async getCustomerDetailsId(userId) {
     try {
-      console.log('Here');
       return await EmployeeService.getCustomerDetailsByUserId(userId);
     } catch (err) {
       logger.error(`Unable to fetch the customer details ${err.stack}`);
