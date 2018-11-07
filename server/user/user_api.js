@@ -12,6 +12,7 @@ router.post('/registerEmployer', async (req, resp) => {
     if (user) {
       return resp.status(404).send({
         userAlreadyExist: true,
+        message: 'User already exists.',
       });
     }
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
@@ -32,13 +33,20 @@ router.post('/registerEmployer', async (req, resp) => {
 router.post('/login', async (req, resp) => {
   try {
     const user = await UserController.getUserDetails(req.body);
-    if (!user) return resp.status(404).send('No user found.');
+    if (!user) {
+      return resp.status(404).send({
+        auth: false,
+        token: null,
+        message: 'Wrong phone number or password.',
+      });
+    }
     // check if the password is valid
     const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
     if (!passwordIsValid) {
-      return resp.status(401).send({
+      return resp.status(404).send({
         auth: false,
         token: null,
+        message: 'Invalid Password.',
       });
     }
     // if user is found and password is valid
@@ -85,7 +93,11 @@ router.get('/logout', (req, res) => {
 router.post('/changePassword', async (req, resp) => {
   try {
     const user = await UserController.getUserDetails(req.body);
-    if (!user) return resp.status(404).send('No user found.');
+    if (!user) {
+      return resp.status(404).send({
+        message: 'No user found.',
+      });
+    }
     const hashedPassword = bcrypt.hashSync(req.body.password, 8);
     req.body.password = hashedPassword;
     await UserController.changePasword(req.body);

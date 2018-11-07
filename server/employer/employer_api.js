@@ -41,6 +41,7 @@ router.post('/createEmployee', async (req, resp) => {
     if (user) {
       return resp.status(404).send({
         userAlreadyExist: true,
+        message: 'User already exists.',
       });
     }
     const employerUserId = req.headers['x-user-id'];
@@ -48,6 +49,7 @@ router.post('/createEmployee', async (req, resp) => {
     if (!employerUserData) {
       return resp.status(404).send({
         employerNotExist: true,
+        message: 'Employer does not exists',
       });
     }
     const employerUser = {
@@ -77,6 +79,7 @@ router.get('/getAllEmployees', async (req, resp) => {
     if (!employerUserData) {
       return resp.status(404).send({
         employerNotExist: true,
+        message: 'Employer does not exists',
       });
     }
     const employerUser = {

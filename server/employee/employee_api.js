@@ -34,6 +34,7 @@ router.post('/createCustomer', async (req, resp) => {
     if (user) {
       return resp.status(404).send({
         userAlreadyExist: true,
+        message: 'User already exists.',
       });
     }
     const employeeUserId = req.headers['x-user-id'];
@@ -41,6 +42,7 @@ router.post('/createCustomer', async (req, resp) => {
     if (!employeeUserData) {
       return resp.status(404).send({
         employeeNotExist: true,
+        message: 'Employee does not exists',
       });
     }
 
@@ -77,6 +79,7 @@ router.post('/uploadFile', async (req, resp) => {
       if (!customerData) {
         return resp.status(404).send({
           customerNotExist: true,
+          message: 'Customer does not exists',
         });
       }
       employeeData = await EmployeeController.getEmployeeDataById(customerData.employeeId);
@@ -90,12 +93,15 @@ router.post('/uploadFile', async (req, resp) => {
     if (!employeeData) {
       return resp.status(404).send({
         employeeNotExist: true,
+        message: 'Employee does not exists',
+
       });
     }
     const employerData = await EmployerService.getEmployerDataId(employeeData.employerId);
     if (!employerData) {
       return resp.status(404).send({
         employerNotExist: true,
+        message: 'Employer does not exists',
       });
     }
 
@@ -110,6 +116,7 @@ router.post('/uploadFile', async (req, resp) => {
         logger.error(`Unable to parse the form ${error.stack}`);
         return resp.status(404).send({
           formParseFailed: true,
+          message: 'Wrong uploaded data',
         });
       }
       const uploadData = [];
@@ -152,6 +159,7 @@ router.get('/getAllCustomer', async (req, resp) => {
     if (!employeeUserData) {
       return resp.status(404).send({
         employeeNotExist: true,
+        message: 'Employee does not exists',
       });
     }
     const employerUser = {
@@ -178,6 +186,7 @@ router.put('/updateCustomer', async (req, resp) => {
     if (!employeeUserData) {
       return resp.status(404).send({
         employeeNotExist: true,
+        message: 'Employee does not exists',
       });
     }
     const {
@@ -187,6 +196,7 @@ router.put('/updateCustomer', async (req, resp) => {
     if (!customer) {
       return resp.status(404).send({
         customerNotExist: true,
+        message: 'Customer does not exists',
       });
     }
     await EmployeeController.updateCustomerDetails(req.body);
@@ -214,6 +224,7 @@ router.get('/getCustomerBillData/:phone', async (req, resp) => {
       if (!customerData) {
         return resp.status(404).send({
           customerNotExist: true,
+          message: 'Customer does not exists',
         });
       }
       employeeData = await EmployeeController.getEmployeeDataById(customerData.employeeId);
@@ -227,6 +238,7 @@ router.get('/getCustomerBillData/:phone', async (req, resp) => {
     if (!employeeData) {
       return resp.status(404).send({
         employeeNotExist: true,
+        message: 'Employee does not exists',
       });
     }
     const employeeUserId = req.headers['x-user-id'];
@@ -234,6 +246,7 @@ router.get('/getCustomerBillData/:phone', async (req, resp) => {
     if (!employeeUserData) {
       return resp.status(404).send({
         employeeNotExist: true,
+        message: 'Employee does not exists',
       });
     }
     const {
@@ -243,6 +256,7 @@ router.get('/getCustomerBillData/:phone', async (req, resp) => {
     if (!customer) {
       return resp.status(404).send({
         customerNotExist: true,
+        message: 'Customer does not exists',
       });
     }
     const billData = await EmployeeController.getCustomerBillInfo(req.params);
@@ -265,6 +279,7 @@ router.post('/updateCustomerBillData', async (req, resp) => {
     if (!customer) {
       return resp.status(404).send({
         customerNotExist: true,
+        message: 'Customer does not exists',
       });
     }
     req.body.userId = userId;
