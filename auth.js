@@ -64,7 +64,7 @@ async function authMw(req, res, next) {
     } else {
       return res.status(401).send({
         auth: false,
-        message: 'Failed to authenticate token.',
+        message: 'Session Expired. Please re-login again.',
       });
     }
   } catch (err) {

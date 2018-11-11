@@ -88,12 +88,21 @@ const EmployeeService = {
   },
   async updateCustomerBillData(customerData) {
     try {
+      const {
+        billData,
+      } = customerData;
       const filter = {
-        userId: customerData.userId,
+        _id: billData._id,
       };
       const query = {
         $set: {
-          billData: customerData.billData,
+          billDate: billData.billDate,
+          billType: billData.billType,
+          billLocation: billData.billLocation,
+          userId: billData.userId,
+          phone: billData.phone,
+          totalBill: billData.totalBill,
+          totalGst: billData.totalGst,
         },
       };
       await dbService.updateOne(customerBillsModel, filter, query);

@@ -1,8 +1,5 @@
 server {
     listen 80;
-
-    server_name 52.90.179.206;
-
     location / {
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $remote_addr;
@@ -12,7 +9,6 @@ server {
         add_header 'Cache-Control' 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
         expires off;
         add_header 'X-Xss-Protection' '1; mode=block' always;
-        add_header 'Content-Security-Policy' "default-src 'self' 'unsafe-inline' 'unsafe-eval' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https://$host:*/ wss://$host:*/ http://$host:*/ ws://$host:*/";
         add_header 'X-Frame-Options' 'SAMEORIGIN' always;
         add_header 'Strict-Transport-Security' 'max-age=31536000';
         add_header 'X-Content-Type-Options' 'nosniff' always;

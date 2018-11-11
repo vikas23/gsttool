@@ -162,7 +162,7 @@ const UserService = {
           if (e) {
             logger.error(e);
           } else {
-            logger.info('Successfully uploaded data to myBucket/myKey');
+            logger.info(`Successfully uploaded data to ${myBucket}/${myKey}`);
           }
         });
       }

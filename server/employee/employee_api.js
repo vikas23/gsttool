@@ -296,4 +296,26 @@ router.post('/updateCustomerBillData', async (req, resp) => {
   }
 });
 
+router.put('/updateCustomerBillData', async (req, resp) => {
+  try {
+    const userId = req.headers['x-user-id'];
+    const user = await UserController.getUserDetailsId(userId);
+    if (!user) {
+      return resp.status(404).send({
+        userNotExist: true,
+        message: 'User does not exists',
+      });
+    }
+    await EmployeeController.updateCustomerBillData(req.body);
+    return resp.status(200).send({
+      success: true,
+    });
+  } catch (err) {
+    logger.error(`Unable to update the customer bills data ${err.stack}`);
+    return resp.status(403).send({
+      error: err,
+    });
+  }
+});
+
 module.exports = router;

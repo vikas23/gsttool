@@ -37,7 +37,7 @@ router.post('/login', async (req, resp) => {
       return resp.status(404).send({
         auth: false,
         token: null,
-        message: 'Wrong phone number or password.',
+        message: 'User does not exists.',
       });
     }
     // check if the password is valid
@@ -78,6 +78,7 @@ router.post('/login', async (req, resp) => {
     logger.error(`Unable to logged in the user ${err.stack}`);
     return resp.status(403).send({
       error: err,
+      message: 'Fail to login.',
     });
   }
 });
